@@ -195,6 +195,7 @@ echo VERSION=$(kubectl -n litmus get cm/agent-config -ojson | jq -r '.data.VERSI
 ```
 
 <p>Finally start subscriber:dev</p>
+
 ```
 docker run --network=host --rm \
   --name litmus-subscriber \
