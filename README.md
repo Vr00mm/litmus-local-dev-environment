@@ -181,7 +181,7 @@ kubectl -n litmus scale deployment subscriber --replicas=0
 
 ```
 echo -n > env-file
-echo "AGENT_NAMESPACE=litmus" >> env-file
+echo AGENT_NAMESPACE=litmus >> env-file
 echo ACCESS_KEY=$(kubectl -n litmus get secret/agent-secret -ojson | jq -r '.data.ACCESS_KEY' |base64 -d) >> env-file
 echo CLUSTER_ID=$(kubectl -n litmus get secret/agent-secret -ojson | jq -r '.data.CLUSTER_ID' |base64 -d) >> env-file
 echo AGENT_SCOPE=$(kubectl -n litmus get cm/agent-config -ojson | jq -r '.data.AGENT_SCOPE') >> env-file
@@ -193,3 +193,16 @@ echo SKIP_SSL_VERIFY=$(kubectl -n litmus get cm/agent-config -ojson | jq -r '.da
 echo START_TIME=$(kubectl -n litmus get cm/agent-config -ojson | jq -r '.data.START_TIME') >> env-file
 echo VERSION=$(kubectl -n litmus get cm/agent-config -ojson | jq -r '.data.VERSION') >> env-file
 ```
+
+<p>Finally start subscriber:dev</p>
+```
+docker run --network=host --rm \
+  --name litmus-subscriber \
+  --env-file=env-file \
+  -v "${HOME}/.kube/config:${HOME}/.kube/config" \
+  -v "${HOME}/.minikube/ca.crt:${HOME}/.minikube/ca.crt" \
+  -v "${HOME}/.minikube/profiles/minikube:${HOME}/.minikube/profiles/minikube" \
+  --entrypoint /litmus/subscriber \
+  -it subscriber:dev \
+  --kubeconfig=${HOME}/.kube/config
+  ```
