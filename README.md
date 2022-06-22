@@ -40,6 +40,12 @@ echo \
 sudo apt update && sudo apt install docker-ce docker-ce-cli containerd.io
 ```
 
+<p> Add your user to docker group</p>
+
+```
+sudo usermod -aG docker $USER && newgrp docker
+```
+
 ### Download && install minikube
 
 ```
