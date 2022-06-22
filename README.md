@@ -62,6 +62,11 @@ curl -fsSL -o helm.tgz https://get.helm.sh/helm-v3.9.0-linux-amd64.tar.gz \
   && tar xzvf helm.tgz \
   && sudo install linux-amd64/helm /usr/local/bin/
 ```
+### Finally restart your computer
+
+```
+reboot
+```
 
 ## Run kubernetes local cluster
 
@@ -98,6 +103,13 @@ minikube status
 alias kubectl='minikube kubectl --'
 ```
 
+<p> Update kubeconfig context to target minikube</p>
+
+```
+cp ~/.kube/config{,_backup}
+minikube update-context
+```
+
 <p> Lets try to reach our cluster</p>
 
 ```
@@ -111,6 +123,7 @@ kubectl get node
 <p> Download helm chart </p>
 
 ```
+cd
 git clone https://github.com/litmuschaos/litmus-helm
 cd litmus-helm
 ```
