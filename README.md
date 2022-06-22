@@ -2,7 +2,8 @@
 
 <p>Hello, here are few instruction to deploy a local kubernetes / litmus env for dev !!!</p>
 
-### Install curl && jq && git
+### Install curl, jq and git
+
 ```
 sudo apt update && sudo apt install -y curl jq git
 ```
@@ -123,7 +124,7 @@ kubectl get node
 <p> Download helm chart </p>
 
 ```
-cd
+cd ~
 git clone https://github.com/litmuschaos/litmus-helm
 cd litmus-helm
 ```
@@ -139,5 +140,55 @@ helm upgrade --install litmus charts/litmus --namespace litmus --create-namespac
 ```
 MINIKUBE_IP=$(minikube ip)
 LITMUS_PORT=$(minikube kubectl -- -n litmus get svc/litmus-frontend-service -ojson  | jq -r '.spec.ports[0].nodePort')
-firefox http://${MINIKUBE_IP}:${LITMUS_PORT}
+echo http://${MINIKUBE_IP}:${LITMUS_PORT}
+
+```
+<p>Use control + click on link to open in your browser</p>
+
+
+<p>Wait for the agent active</p>
+
+```
+kubectl -n litmus wait pods --for condition=Ready -l name
+kubectl -n litmus wait pods --for condition=Ready -l app
+```
+
+<p>we're ready to dev :)</p>
+
+## Example for subscriber
+
+<p>Download litmus</p>
+
+```
+cd ~
+git clone https://github.com/litmuschaos/litmus
+cd litmus/litmus-portal/cluster-agents/subscriber
+```
+
+<p>Build docker image</p>
+
+```
+docker build . -t subscriber:dev
+```
+
+<p>Scale off the current subscriber</p>
+
+```
+kubectl -n litmus scale deployment subscriber --replicas=0
+```
+
+<p>create env-file, you need update this env-file after each reboot</p>
+
+```
+echo -n > env-file
+echo ACCESS_KEY=$(kubectl -n litmus get secret/agent-secret -ojson | jq -r '.data.ACCESS_KEY' |base64 -d) >> env-file
+echo CLUSTER_ID=$(kubectl -n litmus get secret/agent-secret -ojson | jq -r '.data.CLUSTER_ID' |base64 -d) >> env-file
+echo AGENT_SCOPE=$(kubectl -n litmus get cm/agent-config -ojson | jq -r '.data.AGENT_SCOPE') >> env-file
+echo COMPONENTS=$(kubectl -n litmus get cm/agent-config -ojson | jq -r '.data.COMPONENTS') >> env-file
+echo CUSTOM_TLS_CERT=$(kubectl -n litmus get cm/agent-config -ojson | jq -r '.data.CUSTOM_TLS_CERT') >> env-file
+echo IS_CLUSTER_CONFIRMED=$(kubectl -n litmus get cm/agent-config -ojson | jq -r '.data.IS_CLUSTER_CONFIRMED') >> env-file
+echo SERVER_ADDR=$(kubectl -n litmus get cm/agent-config -ojson | jq -r '.data.SERVER_ADDR') >> env-file
+echo SKIP_SSL_VERIFY=$(kubectl -n litmus get cm/agent-config -ojson | jq -r '.data.SKIP_SSL_VERIFY') >> env-file
+echo START_TIME=$(kubectl -n litmus get cm/agent-config -ojson | jq -r '.data.START_TIME') >> env-file
+echo VERSION=$(kubectl -n litmus get cm/agent-config -ojson | jq -r '.data.VERSION') >> env-file
 ```
